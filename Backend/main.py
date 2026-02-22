@@ -9,20 +9,25 @@ app = FastAPI()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Later restrict to Vercel domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# ✅ Create tables on startup (NOT at import time)
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+
+
+# 🔹 Small Talk Handler
 def handle_small_talk(user_message: str):
     text = user_message.lower().strip()
 
     greetings = ["hi", "hello", "hey"]
     thanks = ["thank you", "thanks", "thankyou", "thx"]
-    closing = ["bye", "goodbye", "see you", "okay", "ok","talk later"]
+    closing = ["bye", "goodbye", "see you", "okay", "ok", "talk later"]
     appreciation = [
         "great", "impressive", "nice", "good job",
         "well done", "excellent", "amazing",
@@ -34,6 +39,7 @@ def handle_small_talk(user_message: str):
 
     if any(word in text for word in thanks):
         return "You're welcome! 😊 Let me know if you'd like to explore more about Radhika's work."
+
     if any(word in text for word in appreciation):
         return "Thank you so much! 😊 Radhika truly appreciates your kind words. If you'd like to know more about her projects or experience, I'm happy to help."
 
@@ -42,6 +48,8 @@ def handle_small_talk(user_message: str):
 
     return None
 
+
+# 🔹 Chat Endpoint
 @app.post("/chat")
 async def chat(data: dict):
     user_message = data["message"]
@@ -65,16 +73,15 @@ async def chat(data: dict):
     )
     db.add(user_msg)
 
-    # 🔥 1️⃣ Handle small talk BEFORE calling AI
+    # Handle small talk first
     small_talk_response = handle_small_talk(user_message)
 
     if small_talk_response:
         response = small_talk_response
     else:
-        # 🔥 2️⃣ Only call AI if not small talk
         response = ask_ai(user_message)
 
-    # Save AI message
+    # Save AI response
     ai_msg = ChatMessage(
         session_id=session_id,
         role="ai",
@@ -91,6 +98,7 @@ async def chat(data: dict):
     }
 
 
+# 🔹 Get All Sessions
 @app.get("/sessions")
 def get_sessions():
     db = SessionLocal()
@@ -99,6 +107,7 @@ def get_sessions():
     return sessions
 
 
+# 🔹 Get Messages of a Session
 @app.get("/sessions/{session_id}")
 def get_session_messages(session_id: int):
     db = SessionLocal()
@@ -107,3 +116,9 @@ def get_session_messages(session_id: int):
     ).all()
     db.close()
     return messages
+
+
+# 🔹 Health Check Route (Important for Render)
+@app.get("/")
+def root():
+    return {"status": "Backend running successfully 🚀"}
