@@ -63,19 +63,22 @@ const Chatbot: React.FC = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    const userMessage = input;
     const newMessages: Message[] = [
       ...messages,
-      { role: "user", content: input },
+      { role: "user", content: userMessage },
     ];
 
     setMessages(newMessages);
     setInput("");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/chat", {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: userMessage }),
       });
 
       const data = await response.json();
@@ -118,16 +121,7 @@ const Chatbot: React.FC = () => {
   }
 
   return (
-   <div className="fixed bottom-4 right-4 
-w-[92vw] max-w-[400px] 
-h-[85vh] max-h-[650px] 
-bg-white 
-shadow-2xl 
-rounded-2xl 
-flex flex-col 
-overflow-hidden 
-border border-[#E8F3F0] 
-z-[999]">
+    <div className="fixed bottom-4 right-4 w-[92vw] max-w-[400px] h-[85vh] max-h-[650px] bg-white shadow-2xl rounded-2xl flex flex-col overflow-hidden border border-[#E8F3F0] z-[999]">
 
       {/* Header */}
       <div className="flex justify-between items-center bg-[#6BAA9A] text-white p-4">
