@@ -34,7 +34,7 @@ def handle_small_talk(user_message: str):
         "fantastic", "awesome", "brilliant"
     ]
 
-    if any(word in text for word in greetings):
+    if text in greetings:
         return "Hello! 😊 I'm Radhika's AI assistant. Feel free to ask about her skills, projects, internships, or experience."
 
     if any(word in text for word in thanks):
@@ -46,8 +46,30 @@ def handle_small_talk(user_message: str):
     if any(word in text for word in closing):
         return "It was great interacting with you! 👋 Have a wonderful day."
 
-    return None
+  
+        # Internship / Experience Intent
+    if any(word in text for word in ["internship", "intern", "experience", "work"]):
+                return """
+        ## Professional Experience
 
+        ### Web Developer – National Informatics Centre (NIC)
+        - Developing and maintaining government web applications
+        - Working with ASP.NET MVC and Razor Views
+
+        ### Frontend Developer Intern – GoBuild
+        - Building responsive UI using React.js and Tailwind CSS
+
+        ### Intern – DRDO
+        - Developed an AI-based chatbot using LLMs
+        - Implemented conversational memory and image-based queries
+
+        ### Web Development Intern – ShadowFox
+        - Designed and deployed responsive landing pages
+
+        ### Frontend Development Intern – Ladybird Web Solution
+        - Developed responsive web interfaces and improved accessibility
+        """
+    return None
 
 # 🔹 Chat Endpoint
 @app.post("/chat")

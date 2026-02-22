@@ -20,10 +20,16 @@ def ask_ai(user_message: str):
 
         completion = client.chat.completions.create(
             model="llama-3.1-8b-instant",
-            messages=[
-                {"role": "system", "content": "You are a professional resume assistant."},
-                {"role": "user", "content": prompt}
-            ],
+             messages=[
+        {
+            "role": "system",
+            "content": RESUME_CONTEXT
+        },
+        {
+            "role": "user",
+            "content": user_message
+        }
+    ],
             max_tokens=300,
             temperature=0.2
         )
