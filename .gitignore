@@ -1,0 +1,12 @@
+# Environment files
+.env
+Backend/.env
+
+# Python
+venv/
+__pycache__/
+
+# Node
+node_modules/
+dist/
+build/
