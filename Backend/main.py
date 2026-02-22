@@ -48,26 +48,18 @@ def handle_small_talk(user_message: str):
 
   
         # Internship / Experience Intent
-    if any(word in text for word in ["internship", "intern", "experience", "work"]):
+    if text in ["internship", "intern"]:
                 return """
         ## Professional Experience
 
-        ### Web Developer – National Informatics Centre (NIC)
-        - Developing and maintaining government web applications
-        - Working with ASP.NET MVC and Razor Views
+            -- Web Developer – National Informatics Centre (NIC)
+            -- Frontend Developer Intern – GoBuild
+            -- Intern – DRDO Developed an AI-based chatbot using LLMs
+            -- Web Development Intern – ShadowFox
+            -- Frontend Development Intern – Ladybird Web Solution
 
-        ### Frontend Developer Intern – GoBuild
-        - Building responsive UI using React.js and Tailwind CSS
 
-        ### Intern – DRDO
-        - Developed an AI-based chatbot using LLMs
-        - Implemented conversational memory and image-based queries
-
-        ### Web Development Intern – ShadowFox
-        - Designed and deployed responsive landing pages
-
-        ### Frontend Development Intern – Ladybird Web Solution
-        - Developed responsive web interfaces and improved accessibility
+       
         """
     return None
 
