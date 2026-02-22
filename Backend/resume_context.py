@@ -63,7 +63,7 @@ Core Concepts:
 - Internet of Things
 - Software Development Life Cycle (SDLC)
 
-Professional Experience:
+Professional Experience/Internships:
 
 Web Developer – National Informatics Centre (NIC), Government of India (Jan 2026 – Present)
 - Developing and maintaining government web applications.
