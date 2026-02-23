@@ -23,18 +23,54 @@ const formatResponse = (text: string) => {
 
     if (trimmed.startsWith("- ")) {
       const cleanText = trimmed.replace("- ", "");
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = cleanText.split(urlRegex);
+
       return (
         <div key={index} className="flex gap-2 text-gray-800 text-sm ml-3">
           <span className="font-medium">{counter++}.</span>
-          <span>{cleanText}</span>
+          <span>
+            {parts.map((part, i) =>
+              part.match(urlRegex) ? (
+                <a
+                  key={i}
+                  href={part}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#065F46] underline hover:text-[#064E3B] font-medium"
+                >
+                  {part}
+                </a>
+              ) : (
+                part
+              )
+            )}
+          </span>
         </div>
       );
     }
 
     if (trimmed !== "") {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = trimmed.split(urlRegex);
+
       return (
         <div key={index} className="text-gray-800 text-sm">
-          {trimmed}
+          {parts.map((part, i) =>
+            part.match(urlRegex) ? (
+              <a
+                key={i}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#065F46] underline hover:text-[#064E3B] font-medium"
+              >
+                {part}
+              </a>
+            ) : (
+              part
+            )
+          )}
         </div>
       );
     }
@@ -54,14 +90,16 @@ const Chatbot: React.FC = () => {
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
     const userMessage = input;
     const newMessages: Message[] = [
@@ -71,6 +109,9 @@ const Chatbot: React.FC = () => {
 
     setMessages(newMessages);
     setInput("");
+    setIsTyping(true);
+
+    const startTime = Date.now();
 
     try {
       const API_URL = import.meta.env.VITE_API_URL;
@@ -82,6 +123,13 @@ const Chatbot: React.FC = () => {
       });
 
       const data = await response.json();
+
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = 1000 - elapsedTime;
+
+      if (remainingTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
+      }
 
       setMessages([
         ...newMessages,
@@ -95,6 +143,9 @@ const Chatbot: React.FC = () => {
           content: "Something went wrong. Please try again.",
         },
       ]);
+    } finally {
+      setIsTyping(false);
+      inputRef.current?.focus();
     }
   };
 
@@ -122,7 +173,7 @@ const Chatbot: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 right-4 w-[92vw] max-w-[400px] h-[85vh] max-h-[650px] bg-white shadow-2xl rounded-2xl flex flex-col overflow-hidden border border-[#E8F3F0] z-[999]">
-
+      
       {/* Header */}
       <div className="flex justify-between items-center bg-[#6BAA9A] text-white p-4">
         <h3 className="font-semibold tracking-wide text-sm sm:text-base">
@@ -144,28 +195,49 @@ const Chatbot: React.FC = () => {
                 : "bg-[#E8F3F0] text-gray-800"
             }`}
           >
-            {msg.role === "assistant"
-              ? formatResponse(msg.content)
-              : msg.content}
+            {msg.role === "assistant" ? (
+<div
+  className="
+    chatbot-message
+    [&_a]:text-teal-600
+    [&_a]:font-medium
+    [&_a]:no-underline
+    [&_a:hover]:text-teal-800
+    [&_a:hover]:underline
+  "
+  dangerouslySetInnerHTML={{ __html: msg.content }}
+/>
+            ) : (
+              msg.content
+            )}
           </div>
         ))}
+
+        {isTyping && (
+          <div className="px-4 py-2 rounded-2xl w-fit max-w-[85%] bg-[#E8F3F0] text-gray-600 text-sm shadow-sm">
+            Typing...
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
       <div className="p-3 border-t bg-white flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-        <input
+        <input ref={inputRef}
           type="text"
           className="flex-1 border border-[#6BAA9A] rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-[#6BAA9A] text-sm"
           placeholder="Ask about Radhika..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          // disabled={isTyping}
         />
 
         <button
           onClick={sendMessage}
-          className="bg-[#6BAA9A] text-white px-5 py-2 rounded-full hover:opacity-90 transition text-sm"
+          // disabled={isTyping}
+          className="bg-[#6BAA9A] text-white px-5 py-2 rounded-full hover:opacity-90 transition text-sm disabled:opacity-50"
         >
           Send
         </button>
