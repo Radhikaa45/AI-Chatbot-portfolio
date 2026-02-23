@@ -5,80 +5,6 @@ interface Message {
   content: string;
 }
 
-const formatResponse = (text: string) => {
-  const lines = text.split("\n");
-  let counter = 1;
-
-  return lines.map((line, index) => {
-    const trimmed = line.trim();
-
-    if (trimmed.startsWith("## ")) {
-      counter = 1;
-      return (
-        <div key={index} className="font-semibold text-gray-900 text-sm mt-2">
-          {trimmed.replace("## ", "")}
-        </div>
-      );
-    }
-
-    if (trimmed.startsWith("- ")) {
-      const cleanText = trimmed.replace("- ", "");
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const parts = cleanText.split(urlRegex);
-
-      return (
-        <div key={index} className="flex gap-2 text-gray-800 text-sm ml-3">
-          <span className="font-medium">{counter++}.</span>
-          <span>
-            {parts.map((part, i) =>
-              part.match(urlRegex) ? (
-                <a
-                  key={i}
-                  href={part}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#065F46] underline hover:text-[#064E3B] font-medium"
-                >
-                  {part}
-                </a>
-              ) : (
-                part
-              )
-            )}
-          </span>
-        </div>
-      );
-    }
-
-    if (trimmed !== "") {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const parts = trimmed.split(urlRegex);
-
-      return (
-        <div key={index} className="text-gray-800 text-sm">
-          {parts.map((part, i) =>
-            part.match(urlRegex) ? (
-              <a
-                key={i}
-                href={part}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#065F46] underline hover:text-[#064E3B] font-medium"
-              >
-                {part}
-              </a>
-            ) : (
-              part
-            )
-          )}
-        </div>
-      );
-    }
-
-    return null;
-  });
-};
-
 const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -91,6 +17,7 @@ const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -196,17 +123,17 @@ const Chatbot: React.FC = () => {
             }`}
           >
             {msg.role === "assistant" ? (
-<div
-  className="
-    chatbot-message
-    [&_a]:text-teal-600
-    [&_a]:font-medium
-    [&_a]:no-underline
-    [&_a:hover]:text-teal-800
-    [&_a:hover]:underline
-  "
-  dangerouslySetInnerHTML={{ __html: msg.content }}
-/>
+              <div
+                className="
+                  chatbot-message
+                  [&_a]:text-teal-600
+                  [&_a]:font-medium
+                  [&_a]:no-underline
+                  [&_a:hover]:text-teal-800
+                  [&_a:hover]:underline
+                "
+                dangerouslySetInnerHTML={{ __html: msg.content }}
+              />
             ) : (
               msg.content
             )}
@@ -224,20 +151,19 @@ const Chatbot: React.FC = () => {
 
       {/* Input */}
       <div className="p-3 border-t bg-white flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-        <input ref={inputRef}
+        <input
+          ref={inputRef}
           type="text"
           className="flex-1 border border-[#6BAA9A] rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-[#6BAA9A] text-sm"
           placeholder="Ask about Radhika..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          // disabled={isTyping}
         />
 
         <button
           onClick={sendMessage}
-          // disabled={isTyping}
-          className="bg-[#6BAA9A] text-white px-5 py-2 rounded-full hover:opacity-90 transition text-sm disabled:opacity-50"
+          className="bg-[#6BAA9A] text-white px-5 py-2 rounded-full hover:opacity-90 transition text-sm"
         >
           Send
         </button>
